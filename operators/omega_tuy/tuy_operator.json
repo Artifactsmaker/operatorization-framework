@@ -1,0 +1,34 @@
+{
+  "id": "omega_tuy",
+  "symbol": "ΩTuy",
+  "name": "Tuy Selection Operator",
+  "category": "selection",
+  "version": "1.0",
+
+  "description": "A reusable selection operator that progressively reduces infeasible candidate regions and identifies feasible solution branches.",
+
+  "inputs": [
+    "candidate_space",
+    "constraints"
+  ],
+
+  "outputs": [
+    "reduced_candidate_space",
+    "selected_candidate"
+  ],
+
+  "behaviors": [
+    "candidate_pruning",
+    "constraint_filtering",
+    "search_space_reduction",
+    "branch_selection"
+  ],
+
+  "selection_modes": [
+    "argmin",
+    "map",
+    "sampling"
+  ],
+
+  "status": "conceptual"
+}
