@@ -1,0 +1,35 @@
+{
+"id": "omega_deo2",
+"symbol": "ΩDEO2",
+"name": "Dynamic Evolution Operator",
+"category": "evolution",
+"version": "1.0",
+
+"description": "A disciplined evolution operator for second-order dynamic systems based on projection, normalization, and controlled state evolution.",
+
+"inputs": [
+"state_vector",
+"dynamics_operator",
+"time_step"
+],
+
+"outputs": [
+"updated_state",
+"evolution_trace"
+],
+
+"behaviors": [
+"feasible_projection",
+"operator_normalization",
+"state_evolution",
+"invariant_preservation"
+],
+
+"pipeline": [
+"OP_CUT",
+"OP_BRAUER0",
+"OP_EVOLVE"
+],
+
+"status": "conceptual"
+}
