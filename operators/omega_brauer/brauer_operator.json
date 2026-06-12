@@ -1,29 +1,179 @@
 {
-"id": "omega_brauer",
-"symbol": "ΩBrauer",
-"name": "Brauer Stabilization Operator",
-"category": "stabilization",
-"version": "1.0",
-
-"description": "A stabilization operator that progressively collapses metric distinctions and preserves invariant structures.",
-
-"inputs": [
-"state_space",
-"metric_space",
-"height_parameter"
-],
-
-"outputs": [
-"stable_state_set",
-"invariant_representation"
-],
-
-"behaviors": [
-"stability_preservation",
-"metric_collapse",
-"symmetry_projection",
-"invariant_extraction"
-],
-
-"status": "conceptual"
+  "artifact_type": "operatorology.operator",
+  "name": "Height-Collapse / Metric→Symmetry Attractor",
+  "symbol": "ℋ₀⟂",
+  "version": "1.0.0",
+  "language": "en",
+  "authors": [
+    "Phan Thanh Trung",
+    "ChatGPT (assistant)"
+  ],
+  "summary": "An operator describing the Brauer Height→0 limit: the metric degenerates (loses discriminative power along non-stable dimensions), while symmetry and invariance become dominant governing structures for validation and decision-making. Applicable to AI (robust representations, retrieval/reranking) and O.i (decision-noise reduction), with potential mappings to silicon implementations through precision, rank, and threshold control.",
+  "concepts": {
+    "state_space": {
+      "notation": "𝓧",
+      "description": "State space (embedding space, belief state, decision state, or feature manifold)."
+    },
+    "height": {
+      "notation": "H",
+      "domain": "ℝ_{≥0}",
+      "interpretation": "Structural resolution parameter. High H: fine-grained discrimination; low H: noise suppression and invariant preservation.",
+      "role": "Controls schedules, precision, thresholds, and rank."
+    },
+    "metric": {
+      "notation": "g_H or d_H",
+      "description": "Metric tensor or distance function dependent on Height. As H→0, the metric becomes degenerate.",
+      "degeneracy_condition": "det(g_H)→0 as H→0, or there exists v≠0 such that vᵀ g_0 v = 0."
+    },
+    "symmetry": {
+      "notation": "G",
+      "description": "Transformation group (augmentations) modeling equivalent variants of the same object or meaning.",
+      "orbit": "Orb(x) = { g·x | g∈G }",
+      "invariant": "I(x)=I(g·x) for all g∈G"
+    }
+  },
+  "formal_definitions": [
+    {
+      "id": "def.metric_divergence",
+      "title": "Metric / Divergence Operator",
+      "equation": "𝓓_H(x,y) = (x−y)ᵀ g_H (x−y) (Mahalanobis) or 𝓓_H(x,y)=1−cos(x,y)",
+      "notes": [
+        "g_H may be diagonal (per-dimension weights), low-rank, or a full matrix.",
+        "In hardware implementations, 𝓓_H is primarily realized through MAC (dot-product) operations and optional normalization."
+      ]
+    },
+    {
+      "id": "def.symmetry_projection",
+      "title": "Symmetry Projection Operator (Group Averaging)",
+      "equation": "𝓟_G[f](x)=∫_{g∈G} f(g·x) dμ(g) (practically: average over transformations)",
+      "notes": [
+        "In machine learning: ensemble over augmentations, group pooling, or canonicalization.",
+        "In O.i: stability testing of conclusions under contextual transformations."
+      ]
+    },
+    {
+      "id": "def.height_collapse",
+      "title": "Height-Collapse Operator (H→0 Attractor)",
+      "equation": "𝓒_{H→0}(x) = argmin_z ( 𝓓_H(x,z) + λ·𝓛_inv(z) )",
+      "inv_loss_examples": [
+        "𝓛_inv(z)=E_{g∼G}[||z−g·z||²] (invariance violation penalty)",
+        "𝓛_inv(z)=−I(z) (maximize invariant score)"
+      ],
+      "notes": [
+        "Interpretation: as Height decreases, variants within the same orbit are merged; only invariant coordinates remain.",
+        "Practical implementations do not require solving the full argmin; canonicalization, pooling, and threshold-based merging are sufficient."
+      ]
+    }
+  ],
+  "interpretation": {
+    "core_claim": "As H→0, the metric becomes degenerate and loses discriminative power along non-stable dimensions. Symmetry and invariance emerge as the dominant governing structures, causing variants within Orb(x) to be identified as equivalent under the metric.",
+    "refinement": "The claim is not that the metric vanishes, but that it degenerates: det(g_H)→0 or rank(g_0) decreases."
+  },
+  "ai_applications": [
+    {
+      "area": "Representation / Embedding Robustness",
+      "goal": "Learn representations that remain stable under transformations (augmentations, paraphrases).",
+      "loss": "𝓛 = E_{g∼G}[𝓓_H(f(x), f(g·x))] with a high→low Height schedule",
+      "expected_effect": "Reduced overfitting to non-invariant details and improved generalization."
+    },
+    {
+      "area": "Retrieval / RAG",
+      "goal": "Fast recall using metrics followed by invariance-based reranking.",
+      "pipeline": [
+        "Stage 1 (High H): ANN retrieval using cosine or Mahalanobis distance for top-K recall.",
+        "Stage 2 (Low H): symmetry projection, canonicalization, and stability checks for reranking and verification."
+      ]
+    },
+    {
+      "area": "Calibration / Confidence",
+      "goal": "Reduce Height when entropy or uncertainty becomes high.",
+      "rule": "If entropy(p) > τ, decrease H and strengthen invariance validation."
+    }
+  ],
+  "oi_applications": [
+    {
+      "area": "Decision Noise Engineering",
+      "goal": "Separate signal (invariants) from noise (framing/context-dependent variations).",
+      "model": "x = s + n, and 𝓒_{H→0}(x) ≈ s",
+      "validity_test": "Valid(a)=1 if E_{g∼G}[Δ(a;g)] ≤ ε (conclusion remains stable under framing/source perturbations)."
+    },
+    {
+      "area": "Gatekeeper / Fixed-Point Dynamics",
+      "goal": "Drive the system toward a symmetry fixed-point when a final decision is required.",
+      "note": "Compatible with HZSO/BZDO-style reasoning: dissolving differences to expose the underlying invariant law."
+    }
+  ],
+  "silicon_mapping": {
+    "goal": "Transform the Metric→Symmetry pipeline into a low-cost, high-speed, energy-efficient computational block.",
+    "blocks": [
+      {
+        "name": "Metric Front-End (Recall)",
+        "functions": [
+          "dot product / cosine similarity",
+          "Mahalanobis distance (diagonal or low-rank)",
+          "top-K selection"
+        ],
+        "hardware": [
+          "MAC / systolic arrays",
+          "approximate normalization units",
+          "heap / selection networks"
+        ]
+      },
+      {
+        "name": "Symmetry Back-End (Verification)",
+        "functions": [
+          "canonicalization",
+          "pooling / averaging",
+          "invariant signatures (sketches/hashes)",
+          "stability validation"
+        ],
+        "hardware": [
+          "LUT-based transforms",
+          "pooling units",
+          "random-feature sketches"
+        ]
+      },
+      {
+        "name": "Height Controller",
+        "functions": [
+          "bit-width scheduling",
+          "merge-threshold τ(H)",
+          "rank control k(H)"
+        ],
+        "mapping": [
+          "High H → FP16/INT16, small τ, large k",
+          "Low H → INT8/INT4, large τ, small k"
+        ]
+      }
+    ],
+    "practical_notes": [
+      "Height naturally maps to hardware through precision control, merge thresholds, and rank reduction.",
+      "No explicit Einstein-style metric is required; this metric exists within AI/O.i state spaces."
+    ]
+  },
+  "tests": [
+    {
+      "id": "test.stability_paraphrase",
+      "description": "A question is paraphrased or reframed. After applying 𝓟_G, the resulting representations should be closer than before projection.",
+      "success_criterion": "Mean d_H(z, z_g) decreases as H decreases."
+    },
+    {
+      "id": "test.merge_threshold",
+      "description": "Two states differ primarily along noisy dimensions. As H→0 and τ(H) increases, the system should merge them (treat them as equivalent).",
+      "success_criterion": "Merge rate increases as H decreases, while invariant accuracy remains above an acceptable threshold."
+    }
+  ],
+  "implementation_guidance": {
+    "recommended_defaults": {
+      "metric": "Cosine similarity or diagonal Mahalanobis distance",
+      "projection": "K-sample augmentation averaging",
+      "height_schedule": "Linear schedule or entropy-triggered schedule",
+      "merge_threshold": "τ(H)=τ0 + α(1−H/H0)"
+    },
+    "warnings": [
+      "Reducing H too aggressively may cause excessive collapse and loss of necessary distinctions.",
+      "The symmetry group G must be clearly defined for the target domain."
+    ]
+  },
+  "license": "CC-BY-4.0"
 }
