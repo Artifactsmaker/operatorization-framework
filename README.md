@@ -6,6 +6,16 @@
 
 ---
 
+## Live Demo
+
+Run the Operatorization Experimental Platform directly in your browser:
+
+https://artifactsmaker.github.io/operatorization-framework/playground/
+
+No installation required.
+No backend required.
+Runs entirely in-browser.
+
 ## Overview
 
 Operatorization is a research framework that investigates how stable scientific knowledge structures can be transformed into reusable executable operators.
