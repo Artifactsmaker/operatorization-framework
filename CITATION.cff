@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+title: Operatorization Framework
+message: "If you use this repository, please cite the Zenodo release."
+
+type: software
+
+authors:
+  - family-names: Trung
+    given-names: Phan Thanh
+    orcid: "https://orcid.org/0009-0000-7520-6781"
+
+version: "1.0"
+
+doi: 10.5281/zenodo.20669008
+
+repository-code: "https://github.com/Artifactsmaker/operatorization-framework"
+
+license: "CC-BY-4.0"
