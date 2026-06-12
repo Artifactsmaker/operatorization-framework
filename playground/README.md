@@ -16,6 +16,16 @@ Zenodo Archive DOI: 10.5281/zenodo.20669008
 
 GitHub Repository: Artifactsmaker/operatorization-framework
 
+## Live Demo
+
+Run the Operatorization Experimental Platform directly in your browser:
+
+https://artifactsmaker.github.io/operatorization-framework/playground/
+
+No installation required.
+No backend required.
+Runs entirely in-browser.
+
 2. Core Operator Framework & Mathematical Definitions
 
 The platform instantiates and evaluates three fundamental operator classes over a finite, structured possibility space $S$:
