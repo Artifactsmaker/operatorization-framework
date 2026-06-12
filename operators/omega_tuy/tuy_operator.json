@@ -4,31 +4,40 @@
   "name": "Tuy Selection Operator",
   "category": "selection",
   "version": "1.0",
-
   "description": "A reusable selection operator that progressively reduces infeasible candidate regions and identifies feasible solution branches.",
-
+  "status": "conceptual",
   "inputs": [
     "candidate_space",
-    "constraints"
+    "constraints",
+    "energy_function",
+    "height_function"
   ],
-
   "outputs": [
     "reduced_candidate_space",
     "selected_candidate"
   ],
-
   "behaviors": [
-    "candidate_pruning",
     "constraint_filtering",
-    "search_space_reduction",
+    "energy_filtering",
+    "height_filtering",
+    "candidate_reduction",
     "branch_selection"
   ],
-
   "selection_modes": [
     "argmin",
     "map",
     "sampling"
   ],
-
-  "status": "conceptual"
+  "pipeline": [
+    "candidate_space",
+    "filtering",
+    "reduction",
+    "selection"
+  ],
+  "applications": [
+    "optimization",
+    "search_space_reduction",
+    "decision_support",
+    "computational_reasoning"
+  ]
 }
