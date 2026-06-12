@@ -1,35 +1,141 @@
 {
-"id": "omega_deo2",
-"symbol": "ΩDEO2",
-"name": "Dynamic Evolution Operator",
-"category": "evolution",
-"version": "1.0",
-
-"description": "A disciplined evolution operator for second-order dynamic systems based on projection, normalization, and controlled state evolution.",
-
-"inputs": [
-"state_vector",
-"dynamics_operator",
-"time_step"
-],
-
-"outputs": [
-"updated_state",
-"evolution_trace"
-],
-
-"behaviors": [
-"feasible_projection",
-"operator_normalization",
-"state_evolution",
-"invariant_preservation"
-],
-
-"pipeline": [
-"OP_CUT",
-"OP_BRAUER0",
-"OP_EVOLVE"
-],
-
-"status": "conceptual"
+  "schema": "o-i.operator.v1",
+  "meta": {
+    "id": "deo2",
+    "name_vi": "Toán tử Tiến hóa Có Kỷ luật cho Hệ Vi phân Bậc hai",
+    "name_en": "Disciplined Evolution Operator for Second-Order Differential Systems",
+    "short": "DEO-2",
+    "version": "1.0.0",
+    "status": "draft",
+    "created_utc": "2026-01-30T17:20:10Z",
+    "tags": [
+      "operator",
+      "differential-systems",
+      "chernoff",
+      "tuy-cut",
+      "brauer-height-0",
+      "o.i",
+      "silicon"
+    ]
+  },
+  "definition": {
+    "kind": "operator_limit_product",
+    "symbol": "D_DEO-2(T)",
+    "statement_ascii": "D_DEO-2(T) = lim(n->∞) Π_{k=1..n} [ Π(t_k) · exp(Δt_k · Λ(t_k)) · Π(t_k) ]",
+    "statement_latex": "\\mathcal{D}_{\\mathrm{DEO\\text{-}2}}(T)=\\lim_{n\\to\\infty}\\prod_{k=1}^{n}\\Big(\\Pi_{t_k}\\,\\exp(\\Delta t_k\\,\\Lambda(t_k))\\,\\Pi_{t_k}\\Big)"
+  },
+  "pipeline": {
+    "data_plane": [
+      {
+        "unit": "TCU",
+        "op": "OP_CUT",
+        "purpose_vi": "Cắt miền khả thi (giảm nhiễu trước tính)",
+        "purpose_en": "Feasible-domain projection (noise pruning before compute)"
+      },
+      {
+        "unit": "BZNU",
+        "op": "OP_BRAUER0",
+        "purpose_vi": "Chuẩn hóa cấu trúc độ cao 0",
+        "purpose_en": "Height-zero structural normalization"
+      },
+      {
+        "unit": "CEU",
+        "op": "OP_EVOLVE",
+        "purpose_vi": "Bước tiến hóa Chernoff: exp(Δt·Λ)",
+        "purpose_en": "Chernoff evolution step: exp(Δt·Λ)"
+      }
+    ],
+    "control_plane": {
+      "scheduler": {
+        "scheme": "uniform",
+        "n_steps": 256
+      },
+      "invariants_monitor": [
+        {
+          "name": "Feasibility",
+          "check": "always",
+          "expression": "X ∈ feasible_domain"
+        }
+      ],
+      "trace": {
+        "enabled": true,
+        "buffer": "ring"
+      }
+    }
+  },
+  "params": {
+    "feasible_domain": {
+      "mode": "hard",
+      "constraints": [
+        {
+          "type": "bounds",
+          "vars": [
+            "y",
+            "v"
+          ],
+          "min": -1000000000.0,
+          "max": 1000000000.0
+        },
+        {
+          "type": "logic_guard",
+          "rule": "reject_nan_inf"
+        }
+      ]
+    },
+    "normalization": {
+      "isa_profile": "configurable",
+      "rules": [
+        {
+          "type": "blockize",
+          "target": "2x2_canonical"
+        },
+        {
+          "type": "remove_obstruction",
+          "method": "height_zero_simplify"
+        }
+      ]
+    },
+    "invariants": [
+      {
+        "name": "FeasibleDomain",
+        "check": "always",
+        "expression": "X_k ∈ Π(t_k)"
+      },
+      {
+        "name": "BoundedStep",
+        "check": "end_of_step",
+        "expression": "||X_{k+1}|| ≤ M"
+      }
+    ],
+    "partitioning": {
+      "scheme": "uniform",
+      "n_steps": 256
+    },
+    "silicon": {
+      "isa_ops": [
+        "OP_CUT",
+        "OP_BRAUER0",
+        "OP_EVOLVE"
+      ],
+      "pipeline": [
+        "TCU",
+        "BZNU",
+        "CEU"
+      ],
+      "notes": "Operator-locked pipeline. No backprop/gradient required."
+    }
+  },
+  "io": {
+    "inputs": [
+      "X_k",
+      "A(t_k)",
+      "Δt_k",
+      "g(t_k) (optional handle)"
+    ],
+    "outputs": [
+      "X_{k+1}",
+      "Λ(t_k)",
+      "trace/logs"
+    ]
+  }
 }
