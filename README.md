@@ -134,9 +134,9 @@ Together, these operators illustrate three fundamental behavioral classes explor
 figures/
 graphical_abstract/
 paper/
-supplementary/
 operators/
-schemas/
+playground/
+benchmark/
 ```
 
 ---
