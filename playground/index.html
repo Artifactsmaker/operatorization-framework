@@ -451,6 +451,14 @@
                             </div>
                         </div>
 
+                        <!-- Stale Config Warning Banner -->
+                        <div id="benchmark-stale-warning" class="hidden bg-amber-500/10 border border-amber-500/20 text-amber-400 p-2.5 rounded-lg text-[11px] font-mono flex items-start gap-1.5 mb-2">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 mt-0.5 animate-pulse"></i>
+                            <span>
+                                <strong>⚠ Benchmark stale.</strong><br>Configuration params changed. Please rerun benchmark to obtain fresh data.
+                            </span>
+                        </div>
+
                         <!-- Run button -->
                         <button onclick="runBenchmarkMode()" id="btn-run-benchmark" class="w-full py-2 px-4 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10">
                             <i data-lucide="zap" class="w-4 h-4 fill-slate-950"></i>
@@ -897,16 +905,29 @@
             lucide.createIcons();
         }
 
+        // Helper: Mark current benchmark results as stale when params change
+        function markBenchmarkStale() {
+            if (lastBenchmarkData && lastBenchmarkData.length > 0) {
+                const warningBanner = document.getElementById('benchmark-stale-warning');
+                if (warningBanner) {
+                    warningBanner.classList.remove('hidden');
+                }
+            }
+        }
+
         // Helper: Update numeric/percentage label during slider drag
         function updateRangeLabel(id) {
             const slider = document.getElementById(`input-${id}`);
             const label = document.getElementById(`label-${id}`);
             if (id === 'state-count') {
                 label.innerText = `${slider.value} states`;
+                markBenchmarkStale();
             } else if (id === 'invalid-ratio') {
                 label.innerText = `${slider.value}%`;
+                markBenchmarkStale();
             } else if (id === 'symmetry-groups') {
                 label.innerText = `${slider.value} groups`;
+                markBenchmarkStale();
             } else if (id === 'sim-count') {
                 label.innerText = `${slider.value} runs`;
             }
@@ -1649,6 +1670,9 @@
             runBtn.classList.add('opacity-50');
             progressContainer.classList.remove('hidden');
 
+            // Hide stale warning when starting a fresh run
+            document.getElementById('benchmark-stale-warning').classList.add('hidden');
+
             lastBenchmarkData = [];
             const results = [];
             
@@ -1659,15 +1683,18 @@
 
             const symmetryNames = ['G_alpha', 'G_beta', 'G_gamma', 'G_delta', 'G_epsilon'];
 
+            // CRITICAL FIX: Fetch actual parameter states configured on sliders to run faithful evaluation
+            const currentN = parseInt(document.getElementById('input-state-count').value); 
+            const currentInvalidRatio = parseInt(document.getElementById('input-invalid-ratio').value) / 100;
+            const currentG = parseInt(document.getElementById('input-symmetry-groups').value);
+
             while (completed < simCount) {
                 const currentChunk = Math.min(chunkSize, simCount - completed);
                 
                 for (let i = 0; i < currentChunk; i++) {
-                    const virtualCount = Math.floor(Math.random() * 40) + 20; 
-                    const invalidRatio = 0.3; 
                     const virtualStates = [];
 
-                    for (let n = 0; n < virtualCount; n++) {
+                    for (let n = 0; n < currentN; n++) {
                         const y = parseFloat((Math.random() * 20 - 10).toFixed(4));
                         const v = parseFloat((Math.random() * 4 - 2).toFixed(4));
                         const energy = parseFloat((y * y + 0.5 * v * v).toFixed(4));
@@ -1677,11 +1704,21 @@
                             y: y,
                             v: v,
                             energy: energy,
-                            valid: Math.random() >= invalidRatio,
-                            symmetryGroup: symmetryNames[n % 3],
+                            valid: Math.random() >= currentInvalidRatio,
+                            symmetryGroup: symmetryNames[n % currentG],
                             transitions: [],
                             weight: Math.random()
                         });
+                    }
+
+                    // Add transition paths dynamically scaled with system node density parameters
+                    const edgeThreshold = Math.min(0.9, 0.5 + (1 / currentN));
+                    for (let n = 0; n < currentN; n++) {
+                        for (let t = 0; t < currentN; t++) {
+                            if (t !== n && Math.random() > edgeThreshold) {
+                                virtualStates[n].transitions.push({ to: `V${t+1}`, weight: 0.5 });
+                            }
+                        }
                     }
 
                     const virtualSystem = { states: virtualStates };
@@ -1708,7 +1745,7 @@
 
                     results.push({
                         runIndex: completed + i + 1,
-                        initialStates: virtualCount,
+                        initialStates: currentN,
                         finalStates: pipeStep3.resultState.states.length,
                         executionTimeMs: runTime,
                         compressionRatio: pipeStep2.metrics.compressionRatio,
@@ -1730,6 +1767,7 @@
             lastBenchmarkData = results;
             computeStatistics(results);
 
+            // CRITICAL FIX: Ensure the run benchmark button is robustly unlocked immediately after complete
             runBtn.disabled = false;
             runBtn.classList.remove('opacity-50');
             statusText.innerText = "Simulation runs finished.";
@@ -2184,6 +2222,7 @@
             });
         }
 
+
         // --- DATA VISUALIZATION CHART ENGINE ---
         function initCharts() {
             const ctx = document.getElementById('benchmark-chart').getContext('2d');
@@ -2233,6 +2272,7 @@
             benchmarkChartInstance.update();
         }
 
+
         // --- EXPORT DATA UTILITIES ---
         function exportBenchmarkData(format) {
             if (lastBenchmarkData.length === 0) {
@@ -2240,20 +2280,53 @@
                 return;
             }
 
+            // CRITICAL UPGRADE: Read active configuration metadata to write into exports
+            const currentN = parseInt(document.getElementById('input-state-count').value); 
+            const currentInvalidRatioPercent = parseInt(document.getElementById('input-invalid-ratio').value);
+            const currentG = parseInt(document.getElementById('input-symmetry-groups').value);
+            
+            let profileName = "Large";
+            if (benchmarkRunsCountSetting === 100) profileName = "Small";
+            else if (benchmarkRunsCountSetting === 1000) profileName = "Large";
+            else if (benchmarkRunsCountSetting === 10000) profileName = "Max";
+
             let mimeType = "text/plain";
             let content = "";
             let filename = `benchmark_results_${Date.now()}`;
 
             if (format === 'json') {
                 mimeType = "application/json";
-                content = JSON.stringify(lastBenchmarkData, null, 4);
+                const exportObj = {
+                    metadata: {
+                        profile: profileName,
+                        N: currentN,
+                        invalidRatio: currentInvalidRatioPercent,
+                        G: currentG,
+                        runs: benchmarkRunsCountSetting,
+                        timestamp: new Date().toISOString(),
+                        doi: "10.5281/zenodo.20669008",
+                        author: "Phan Thanh Trung"
+                    },
+                    results: lastBenchmarkData
+                };
+                content = JSON.stringify(exportObj, null, 4);
                 filename += ".json";
             } else if (format === 'csv') {
                 mimeType = "text/csv";
                 filename += ".csv";
                 
+                // Write Metadata Headers & Values at the very top of the CSV file
+                const metaHeaders = ["Profile", "N", "InvalidRatioPercent", "G", "Runs"];
+                const metaValues = [profileName, currentN, currentInvalidRatioPercent, currentG, benchmarkRunsCountSetting];
+                
                 const headers = ["RunIndex", "InitialStates", "FinalStates", "ExecutionTimeMs", "CompressionRatio", "ReductionRate", "FidelityScore", "OperatorScore"];
-                const csvRows = [headers.join(",")];
+                
+                const csvRows = [
+                    metaHeaders.join(","),
+                    metaValues.join(","),
+                    "", // empty separator line
+                    headers.join(",")
+                ];
 
                 lastBenchmarkData.forEach(row => {
                     const values = [
@@ -2281,7 +2354,7 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            addTraceLog("Downloaded simulation report.", "info");
+            addTraceLog(`Downloaded simulation report in ${format.toUpperCase()} format with metadata header.`, "info");
         }
     </script>
 </body>
