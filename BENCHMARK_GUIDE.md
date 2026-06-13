@@ -49,6 +49,8 @@ Larger values create larger search spaces and increase computational complexity.
 | 150 | Maximum supported possibility space |
 
 ---
+For reproducibility, each benchmark profile was generated once and reused across all operator evaluations. This ensures that ΩTuy, ΩBrauer, ΩDEO2, and the full pipeline are evaluated under identical initial possibility-space conditions.
+---
 
 ## Role in ΩTuy
 
