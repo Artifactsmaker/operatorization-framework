@@ -1821,11 +1821,12 @@
         }
 
         function computeStatistics(data) {
+            // FIX: Map matching exact DOM/statistics identifiers 
             const keys = {
                 time: data.map(d => d.executionTimeMs),
-                fidelity: data.map(d => d.fidelityScore),
-                compression: data.map(d => d.compressionRatio),
-                reduction: data.map(d => d.reductionRate),
+                fid: data.map(d => d.fidelityScore),
+                comp: data.map(d => d.compressionRatio),
+                red: data.map(d => d.reductionRate),
                 score: data.map(d => d.operatorScore)
             };
 
@@ -1856,15 +1857,15 @@
             document.getElementById('st-fid-std').innerText = `${stats.fid.stdDev.toFixed(1)}`;
             document.getElementById('st-fid-minmax').innerText = `${stats.fid.min.toFixed(1)} / ${stats.fid.max.toFixed(1)}`;
 
-            document.getElementById('st-comp-mean').innerText = `${stats.compression.mean.toFixed(2)}x`;
-            document.getElementById('st-comp-med').innerText = `${stats.compression.median.toFixed(2)}x`;
-            document.getElementById('st-comp-std').innerText = `${stats.compression.stdDev.toFixed(2)}`;
-            document.getElementById('st-comp-minmax').innerText = `${stats.compression.min.toFixed(1)} / ${stats.compression.max.toFixed(1)}`;
+            document.getElementById('st-comp-mean').innerText = `${stats.comp.mean.toFixed(2)}x`;
+            document.getElementById('st-comp-med').innerText = `${stats.comp.median.toFixed(2)}x`;
+            document.getElementById('st-comp-std').innerText = `${stats.comp.stdDev.toFixed(2)}`;
+            document.getElementById('st-comp-minmax').innerText = `${stats.comp.min.toFixed(1)} / ${stats.comp.max.toFixed(1)}`;
 
-            document.getElementById('st-red-mean').innerText = `${stats.reduction.mean.toFixed(1)}%`;
-            document.getElementById('st-red-med').innerText = `${stats.reduction.median.toFixed(1)}%`;
-            document.getElementById('st-red-std').innerText = `${stats.reduction.stdDev.toFixed(1)}`;
-            document.getElementById('st-red-minmax').innerText = `${stats.reduction.min.toFixed(1)} / ${stats.reduction.max.toFixed(1)}`;
+            document.getElementById('st-red-mean').innerText = `${stats.red.mean.toFixed(1)}%`;
+            document.getElementById('st-red-med').innerText = `${stats.red.median.toFixed(1)}%`;
+            document.getElementById('st-red-std').innerText = `${stats.red.stdDev.toFixed(1)}`;
+            document.getElementById('st-red-minmax').innerText = `${stats.red.min.toFixed(1)} / ${stats.red.max.toFixed(1)}`;
 
             document.getElementById('st-score-mean').innerText = `${stats.score.mean.toFixed(1)}%`;
             document.getElementById('st-score-med').innerText = `${stats.score.median.toFixed(1)}%`;
@@ -2398,7 +2399,7 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
-            addTraceLog(`Downloaded simulation report in ${format.toUpperCase()} format with metadata header.`, "info");
+            addTraceLog("Downloaded simulation report.", "info");
         }
     </script>
 </body>
