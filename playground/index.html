@@ -819,7 +819,7 @@
             deo2: {
                 title: "ΩDEO2 - Disciplined Evolution Operator (D_DEO-2)",
                 desc: "Disciplined evolution for second-order differential systems. Simulates the operator limit product form: TCU (OP_CUT) ➔ BZNU (OP_BRAUER0) ➔ CEU (OP_EVOLVE) sequentially per state step.",
-                formula: "\\mathcal{D}_{\\mathrm{DEO\\text{-}2}}(T)=\\lim_{n\\to\\infty}\\prod_{k=1}^{n}\\Big(\\Pi_{t_k}\\,\\exp(\\Delta t_k\\,\\Lambda(t_k))\\,\\Pi_{t_k}\\Big)",
+                formula: "\\mathcal{D}_{\\mathrm{DEO\\text{-}2}}(T)=\\lim_{n\\to\\infty}\\prod_{k=1}^{n}\\Big(\\Pi_{t_k}\\,\\exp(\\Delta t_k\\,\\Lambda(t_k))\\,\\Pi_{t_k}\\,\\Big)",
                 schema: {
                     "$schema": "http://json-schema.org/draft-07/schema#",
                     "title": "DEO2OperatorParams",
@@ -1279,7 +1279,9 @@
             document.getElementById('operator-score-count').innerText = scoreHistory.length;
         }
 
-        // 1. ΩTuy Selection Operator (Possibility-Space Reduction)
+        // --- MATH OPERATORS ACCORDING TO SPECIFICATIONS ---
+
+        // 1. ΩTuy Selection Operator
         function runTuyOperator(inputState, config) {
             const start = performance.now();
             const threshold = (config && config.integrityThreshold !== undefined) ? config.integrityThreshold : 25;
