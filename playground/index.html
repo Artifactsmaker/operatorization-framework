@@ -687,6 +687,7 @@
                         <!-- SVG inject -->
                     </div>
                     <button onclick="downloadPaperSVG('paper-fig-pipeline', 'figure_operator_pipeline.svg')" class="mt-4 px-3 py-1.5 rounded bg-slate-950 hover:bg-slate-800 text-slate-200 text-xs font-bold transition flex items-center gap-1.5">
+                        <img src="https://orcid.org/assets/vectors/orcid.logo.svg" class="w-3.5 h-3.5" style="display:none;" /> <!-- prefetch dummy -->
                         <i data-lucide="download" class="w-4 h-4 text-sky-400"></i> Download SVG Vector File
                     </button>
                 </div>
@@ -1284,11 +1285,11 @@
         // 1. ΩTuy Selection Operator
         function runTuyOperator(inputState, config) {
             const start = performance.now();
-            const threshold = config.integrityThreshold || 25;
-            const strict = config.strictValidation !== undefined ? config.strictValidation : true;
-            const mode = config.mode || "argmin";
+            const threshold = (config && config.integrityThreshold !== undefined) ? config.integrityThreshold : 25;
+            const strict = (config && config.strictValidation !== undefined) ? config.strictValidation : true;
+            const mode = (config && config.mode) ? config.mode : "argmin";
 
-            const initialStates = inputState.states;
+            const initialStates = (inputState && inputState.states) ? inputState.states : [];
             const initialCount = initialStates.length;
             const initialInvalidCount = initialStates.filter(s => !s.valid).length;
             const initialFeasibleCount = initialStates.filter(s => s.valid && s.energy >= threshold).length;
@@ -1321,7 +1322,7 @@
 
             const validIds = new Set(filteredStates.map(s => s.id));
             filteredStates = filteredStates.map(state => {
-                const cleanedTransitions = state.transitions.filter(tr => validIds.has(tr.to));
+                const cleanedTransitions = state.transitions ? state.transitions.filter(tr => validIds.has(tr.to)) : [];
                 return { ...state, transitions: cleanedTransitions };
             });
 
@@ -1354,27 +1355,29 @@
         function runBrauerOperator(inputState, config) {
             const start = performance.now();
             
-            const H = config.height?.H !== undefined ? config.height.H : 0.2;
-            const tau0 = config.height?.tau0 !== undefined ? config.height.tau0 : 0.15;
-            const alpha = config.height?.alpha !== undefined ? config.height.alpha : 0.4;
+            const H = (config && config.height && config.height.H !== undefined) ? config.height.H : 0.2;
+            const tau0 = (config && config.height && config.height.tau0 !== undefined) ? config.height.tau0 : 0.15;
+            const alpha = (config && config.height && config.height.alpha !== undefined) ? config.height.alpha : 0.4;
 
-            const initialCount = inputState.states.length;
+            const initialStates = (inputState && inputState.states) ? inputState.states : [];
+            const initialCount = initialStates.length;
             if (initialCount === 0) {
                 return {
-                    resultState: inputState,
+                    resultState: { states: [], timestamp: Date.now() },
                     metrics: { executionTime: 0, compressionRatio: 1.0, mergedCount: 0, energyPreservationRate: 100.0 }
                 };
             }
 
             const tau = tau0 + alpha * (1 - H);
-            const totalEnergyBefore = inputState.states.reduce((acc, s) => acc + s.energy, 0);
+            const totalEnergyBefore = initialStates.reduce((acc, s) => acc + (s.energy || 0), 0);
 
             const groups = {};
-            inputState.states.forEach(s => {
-                if (!groups[s.symmetryGroup]) {
-                    groups[s.symmetryGroup] = [];
+            initialStates.forEach(s => {
+                const groupKey = s.symmetryGroup || 'G_default';
+                if (!groups[groupKey]) {
+                    groups[groupKey] = [];
                 }
-                groups[s.symmetryGroup].push(s);
+                groups[groupKey].push(s);
             });
 
             const stabilizedStates = [];
@@ -1389,9 +1392,9 @@
                 let valid = true;
 
                 nodes.forEach(n => {
-                    totalY += n.y;
-                    totalV += n.v;
-                    totalEnergy += n.energy;
+                    totalY += (n.y || 0);
+                    totalV += (n.v || 0);
+                    totalEnergy += (n.energy || 0);
                     if (!n.valid) valid = false;
                     idMapping[n.id] = repId;
                 });
@@ -1414,22 +1417,24 @@
                 });
             });
 
-            inputState.states.forEach(oldNode => {
+            initialStates.forEach(oldNode => {
                 const newSourceId = idMapping[oldNode.id];
                 const newSourceNode = stabilizedStates.find(s => s.id === newSourceId);
 
-                oldNode.transitions.forEach(tr => {
-                    const newTargetId = idMapping[tr.to];
-                    if (newTargetId && newSourceNode && newSourceId !== newTargetId) {
-                        const exists = newSourceNode.transitions.some(existTr => existTr.to === newTargetId);
-                        if (!exists) {
-                            newSourceNode.transitions.push({
-                                to: newTargetId,
-                                weight: tr.weight
-                            });
+                if (oldNode.transitions) {
+                    oldNode.transitions.forEach(tr => {
+                        const newTargetId = idMapping[tr.to];
+                        if (newTargetId && newSourceNode && newSourceId !== newTargetId) {
+                            const exists = newSourceNode.transitions.some(existTr => existTr.to === newTargetId);
+                            if (!exists) {
+                                newSourceNode.transitions.push({
+                                    to: newTargetId,
+                                    weight: tr.weight
+                                });
+                            }
                         }
-                    }
-                });
+                    });
+                }
             });
 
             const totalEnergyAfter = stabilizedStates.reduce((acc, s) => acc + (s.energy * s.originalNodesCount), 0);
@@ -1460,16 +1465,17 @@
         function runDEO2Operator(inputState, config) {
             const start = performance.now();
             
-            const steps = config.partitioning?.n_steps || 4;
-            const dt = config.evolution_delta_t || 0.2;
-            const mode = config.feasible_domain?.mode || "hard";
+            const steps = (config && config.partitioning && config.partitioning.n_steps) ? config.partitioning.n_steps : 4;
+            const dt = (config && config.evolution_delta_t !== undefined) ? config.evolution_delta_t : 0.2;
+            const mode = (config && config.feasible_domain && config.feasible_domain.mode) ? config.feasible_domain.mode : "hard";
 
-            const evolvedStates = JSON.parse(JSON.stringify(inputState.states));
+            const initialStates = (inputState && inputState.states) ? inputState.states : [];
+            const evolvedStates = JSON.parse(JSON.stringify(initialStates));
             const initialCount = evolvedStates.length;
 
             if (initialCount === 0) {
                 return {
-                    resultState: inputState,
+                    resultState: { states: [], timestamp: Date.now() },
                     metrics: { executionTime: 0, evolutionDepth: 0, newTransitionsCount: 0, transitionValidityRate: 1.0, evolutionConsistency: 1.0 }
                 };
             }
@@ -1483,9 +1489,9 @@
                         return; 
                     }
 
-                    const acceleration = -0.5 * state.y - 0.2 * state.v;
-                    const nextY = state.y + state.v * dt;
-                    const nextV = state.v + acceleration * dt;
+                    const acceleration = -0.5 * (state.y || 0) - 0.2 * (state.v || 0);
+                    const nextY = (state.y || 0) + (state.v || 0) * dt;
+                    const nextV = (state.v || 0) + acceleration * dt;
                     
                     state.y = parseFloat(nextY.toFixed(4));
                     state.v = parseFloat(nextV.toFixed(4));
@@ -1500,6 +1506,7 @@
                         const targetIdx = Math.floor(Math.random() * evolvedStates.length);
                         const targetNode = evolvedStates[targetIdx];
                         if (targetNode.id !== state.id) {
+                            if (!state.transitions) state.transitions = [];
                             const exists = state.transitions.some(t => t.to === targetNode.id);
                             if (!exists) {
                                 state.transitions.push({
@@ -1693,6 +1700,19 @@
                     btn.classList.add('bg-slate-800');
                 }
             });
+
+            // FIX: Reset progress bar, stale warnings and status texts on profile change to prevent looking stale/frozen
+            const progressContainer = document.getElementById('benchmark-progress-container');
+            if (progressContainer) {
+                progressContainer.classList.add('hidden'); // hide until run is clicked
+            }
+            const progressBar = document.getElementById('benchmark-progress-bar');
+            if (progressBar) progressBar.style.width = '0%';
+            const percentageText = document.getElementById('benchmark-percentage');
+            if (percentageText) percentageText.innerText = '0%';
+            const statusText = document.getElementById('benchmark-status-text');
+            if (statusText) statusText.innerText = `Awaiting benchmark run (${runs} iterations)...`;
+
             addTraceLog(`Benchmark profile switched to ${runs} simulation runs.`, "info");
         }
 
@@ -1750,12 +1770,15 @@
                             });
                         }
 
-                        // Add transition paths dynamically scaled with system node density parameters
-                        const edgeThreshold = Math.min(0.9, 0.5 + (1 / currentN));
+                        // OPTIMIZATION: Linear transition generation O(N) instead of quadratic O(N^2)
+                        // This prevents timing out and UI locking even up to 10k simulations!
+                        const maxLinks = Math.min(3, currentN - 1);
                         for (let n = 0; n < currentN; n++) {
-                            for (let t = 0; t < currentN; t++) {
-                                if (t !== n && Math.random() > edgeThreshold) {
-                                    virtualStates[n].transitions.push({ to: `V${t+1}`, weight: 0.5 });
+                            const links = Math.floor(Math.random() * maxLinks) + 1;
+                            for (let l = 0; l < links; l++) {
+                                const targetIdx = Math.floor(Math.random() * currentN);
+                                if (targetIdx !== n) {
+                                    virtualStates[n].transitions.push({ to: `V${targetIdx+1}`, weight: 0.5 });
                                 }
                             }
                         }
@@ -1812,7 +1835,7 @@
             } catch (error) {
                 console.error("Benchmark iteration error:", error);
                 statusText.innerText = "Error encountered during simulation.";
-                addTraceLog(`Benchmark failed: ${error.message}`, "info");
+                addTraceLog(`Benchmark failed: ${error.message}. Stack: ${error.stack}`, "info");
             } finally {
                 // Ensure the run benchmark button is robustly unlocked immediately after completion or failure
                 runBtn.disabled = false;
@@ -1834,12 +1857,12 @@
             Object.entries(keys).forEach(([key, arr]) => {
                 arr.sort((a, b) => a - b);
                 
-                const min = arr[0];
-                const max = arr[arr.length - 1];
-                const median = arr[Math.floor(arr.length / 2)];
-                const sum = arr.reduce((a, b) => a + b, 0);
-                const mean = sum / arr.length;
-                const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / arr.length;
+                const min = arr[0] || 0;
+                const max = arr[arr.length - 1] || 0;
+                const median = arr[Math.floor(arr.length / 2)] || 0;
+                const sum = arr.reduce((a, b) => a + b, 0) || 0;
+                const mean = sum / (arr.length || 1);
+                const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length || 1);
                 const stdDev = Math.sqrt(variance);
 
                 stats[key] = { mean, median, stdDev, min, max };
@@ -2116,291 +2139,4 @@
                     <line x1="50" y1="50" x2="550" y2="50" stroke="#e2e8f0" stroke-dasharray="4"/>
 
                     <text x="300" y="210" font-size="10" fill="#475569" text-anchor="middle">Empirical Behavioral Fidelity (%)</text>
-                    <text x="15" y="115" font-size="10" fill="#475569" text-anchor="middle" transform="rotate(-90 15 115)">Sample Density</text>
-
-                    <text x="50" y="195" font-size="8" fill="#64748b" text-anchor="middle">${minFid.toFixed(1)}%</text>
-                    <text x="550" y="195" font-size="8" fill="#64748b" text-anchor="middle">${maxFid.toFixed(1)}%</text>
-
-                    <path d="${pathD}" fill="none" stroke="#2563eb" stroke-width="2.5" />
-                    <path d="${pathD} L 550 180 L 50 180 Z" fill="#3b82f6" fill-opacity="0.1" />
-                </svg>
-            `;
-            document.getElementById('paper-fig-fidelity').innerHTML = fidelitySvg;
-
-            times.sort((a,b)=>a-b);
-            const sumTimes = times.reduce((a, b) => a + b, 0);
-            const meanTime = sumTimes / times.length;
-            const varTime = times.reduce((a, b) => a + Math.pow(b - meanTime, 2), 0) / times.length;
-            const stdTime = Math.sqrt(varTime) || 0.01;
-
-            let gaussianPath = `M 50 180 `;
-            for(let p=0; p<=100; p++) {
-                const xVal = meanTime - 3*stdTime + (p/100)*(6*stdTime);
-                const yVal = (1 / (stdTime * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * Math.pow((xVal - meanTime)/stdTime, 2));
-                const scaledY = 180 - Math.min(130, yVal * 15);
-                gaussianPath += `L ${50 + p*5} ${scaledY} `;
-            }
-            gaussianPath += `L 550 180 Z`;
-
-            const runtimeSvg = `
-                <svg width="600" height="220" xmlns="http://www.w3.org/2000/svg" style="background:#f8fafc; border:1px solid #e2e8f0; font-family:sans-serif;">
-                    <line x1="50" y1="180" x2="550" y2="180" stroke="#cbd5e1" stroke-width="1.5"/>
-                    <line x1="50" y1="50" x2="50" y2="180" stroke="#cbd5e1" stroke-width="1.5"/>
-                    
-                    <line x1="50" y1="115" x2="550" y2="115" stroke="#e2e8f0" stroke-dasharray="4"/>
-
-                    <text x="300" y="210" font-size="10" fill="#475569" text-anchor="middle">Computational Execution Latency Cost (ms)</text>
-                    <text x="15" y="115" font-size="10" fill="#475569" text-anchor="middle" transform="rotate(-90 15 115)">Normal Probability Density</text>
-
-                    <text x="300" y="195" font-size="8" fill="#2563eb" text-anchor="middle">Mean (μ): ${meanTime.toFixed(4)} ms</text>
-                    <text x="50" y="195" font-size="8" fill="#64748b" text-anchor="middle">${(meanTime - 3*stdTime).toFixed(3)} ms</text>
-                    <text x="550" y="195" font-size="8" fill="#64748b" text-anchor="middle">${(meanTime + 3*stdTime).toFixed(3)} ms</text>
-
-                    <path d="${gaussianPath}" fill="#10b981" fill-opacity="0.15" stroke="#059669" stroke-width="2.5" />
-                </svg>
-            `;
-            document.getElementById('paper-fig-runtime').innerHTML = runtimeSvg;
-
-            lucide.createIcons();
-        }
-
-        function downloadPaperSVG(containerId, filename) {
-            const svgElement = document.getElementById(containerId).querySelector('svg');
-            if (!svgElement) return;
-
-            const svgString = new XMLSerializer().serializeToString(svgElement);
-            const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        // --- DYNAMIC GRAPH INTERACTIVE VISUALIZER ---
-        function visualizeStateNetwork(svgId, states) {
-            const svg = document.getElementById(svgId);
-            svg.innerHTML = ""; 
-
-            const isBefore = svgId === 'svg-before';
-            const countLabel = document.getElementById(isBefore ? 'before-node-count' : 'after-node-count');
-            const invalidCount = states.filter(s => !s.valid).length;
-            
-            countLabel.innerText = `Nodes: ${states.length} | Invalid: ${invalidCount}`;
-
-            if (states.length === 0) {
-                const emptyText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                emptyText.setAttribute("x", "200");
-                emptyText.setAttribute("y", "150");
-                emptyText.setAttribute("fill", "#64748b");
-                emptyText.setAttribute("font-size", "12");
-                emptyText.setAttribute("text-anchor", "middle");
-                emptyText.textContent = "Possibility Space Empty";
-                svg.appendChild(emptyText);
-                return;
-            }
-
-            const nodePositions = {};
-            const radius = 95;
-            const centerX = 200;
-            const centerY = 150;
-
-            states.forEach((state, idx) => {
-                const angle = (idx / states.length) * 2 * Math.PI;
-                const x = centerX + radius * Math.cos(angle) + (Math.sin(idx) * 8);
-                const y = centerY + radius * Math.sin(angle) + (Math.cos(idx) * 8);
-                nodePositions[state.id] = { x, y };
-            });
-
-            states.forEach(state => {
-                const startPos = nodePositions[state.id];
-                state.transitions.forEach(tr => {
-                    const endPos = nodePositions[tr.to];
-                    if (startPos && endPos) {
-                        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                        line.setAttribute("x1", startPos.x);
-                        line.setAttribute("y1", startPos.y);
-                        line.setAttribute("x2", endPos.x);
-                        line.setAttribute("y2", endPos.y);
-                        line.setAttribute("stroke", "#334155");
-                        line.setAttribute("stroke-width", "1");
-                        line.setAttribute("opacity", "0.5");
-                        svg.appendChild(line);
-                    }
-                });
-            });
-
-            states.forEach(state => {
-                const pos = nodePositions[state.id];
-                if (!pos) return;
-
-                const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                group.setAttribute("cursor", "pointer");
-
-                const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
-                title.textContent = `ID: ${state.id}\nGroup: ${state.symmetryGroup}\nVector X = [y: ${state.y}, v: ${state.v}]\nEnergy: ${state.energy}\nValid: ${state.valid}`;
-                group.appendChild(title);
-
-                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                circle.setAttribute("cx", pos.x);
-                circle.setAttribute("cy", pos.y);
-                circle.setAttribute("r", state.isRepresentative ? "9" : "6");
-
-                if (!state.valid) {
-                    circle.setAttribute("fill", "#ef4444"); 
-                    circle.setAttribute("stroke", "#f87171");
-                } else if (state.isRepresentative) {
-                    circle.setAttribute("fill", "#a78bfa"); 
-                    circle.setAttribute("stroke", "#c084fc");
-                } else {
-                    circle.setAttribute("fill", "#38bdf8"); 
-                    circle.setAttribute("stroke", "#7dd3fc");
-                }
-                circle.setAttribute("stroke-width", "1.5");
-                group.appendChild(circle);
-
-                svg.appendChild(group);
-            });
-        }
-
-
-        // --- DATA VISUALIZATION CHART ENGINE ---
-        function initCharts() {
-            const ctx = document.getElementById('benchmark-chart').getContext('2d');
-            benchmarkChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Execution Time (ms)',
-                        data: [],
-                        borderColor: '#f59e0b',
-                        borderWidth: 1.5,
-                        backgroundColor: 'rgba(245, 158, 11, 0.08)',
-                        fill: true,
-                        pointRadius: 0,
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        x: {
-                            ticks: { display: false },
-                            grid: { color: '#334155' }
-                        },
-                        y: {
-                            grid: { color: '#334155' },
-                            ticks: { color: '#94a3b8', font: { size: 9 } }
-                        }
-                    }
-                }
-            });
-        }
-
-        function updateBenchmarkChart(results) {
-            if (!benchmarkChartInstance) return;
-
-            const labels = results.map(r => r.runIndex);
-            const runTimes = results.map(r => r.executionTimeMs);
-
-            benchmarkChartInstance.data.labels = labels;
-            benchmarkChartInstance.data.datasets[0].data = runTimes;
-            benchmarkChartInstance.update();
-        }
-
-
-        // --- EXPORT DATA UTILITIES ---
-        function exportBenchmarkData(format) {
-            if (lastBenchmarkData.length === 0) {
-                alert("Please launch a Benchmark run before exporting data.");
-                return;
-            }
-
-            // CRITICAL UPGRADE: Read active configuration metadata to write into exports
-            const currentN = parseInt(document.getElementById('input-state-count').value); 
-            const currentInvalidRatioPercent = parseInt(document.getElementById('input-invalid-ratio').value);
-            const currentG = parseInt(document.getElementById('input-symmetry-groups').value);
-            
-            let profileName = "Large";
-            if (benchmarkRunsCountSetting === 100) profileName = "Small";
-            else if (benchmarkRunsCountSetting === 1000) profileName = "Large";
-            else if (benchmarkRunsCountSetting === 10000) profileName = "Max";
-
-            let mimeType = "text/plain";
-            let content = "";
-            let filename = `benchmark_results_${Date.now()}`;
-
-            if (format === 'json') {
-                mimeType = "application/json";
-                const exportObj = {
-                    metadata: {
-                        profile: profileName,
-                        N: currentN,
-                        invalidRatio: currentInvalidRatioPercent,
-                        G: currentG,
-                        runs: benchmarkRunsCountSetting,
-                        timestamp: new Date().toISOString(),
-                        doi: "10.5281/zenodo.20669008",
-                        author: "Phan Thanh Trung"
-                    },
-                    results: lastBenchmarkData
-                };
-                content = JSON.stringify(exportObj, null, 4);
-                filename += ".json";
-            } else if (format === 'csv') {
-                mimeType = "text/csv";
-                filename += ".csv";
-                
-                // Write Metadata Headers & Values at the very top of the CSV file
-                const metaHeaders = ["Profile", "N", "InvalidRatioPercent", "G", "Runs"];
-                const metaValues = [profileName, currentN, currentInvalidRatioPercent, currentG, benchmarkRunsCountSetting];
-                
-                const headers = ["RunIndex", "InitialStates", "FinalStates", "ExecutionTimeMs", "CompressionRatio", "ReductionRate", "FidelityScore", "OperatorScore"];
-                
-                const csvRows = [
-                    metaHeaders.join(","),
-                    metaValues.join(","),
-                    "", // empty separator line
-                    headers.join(",")
-                ];
-
-                lastBenchmarkData.forEach(row => {
-                    const values = [
-                        row.runIndex,
-                        row.initialStates,
-                        row.finalStates,
-                        row.executionTimeMs.toFixed(5),
-                        row.compressionRatio,
-                        row.reductionRate,
-                        row.fidelityScore.toFixed(3),
-                        row.operatorScore.toFixed(3)
-                    ];
-                    csvRows.push(values.join(","));
-                });
-                content = csvRows.join("\n");
-            }
-
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            addTraceLog("Downloaded simulation report.", "info");
-        }
-    </script>
-</body>
-</html>
+                    <text x="15
