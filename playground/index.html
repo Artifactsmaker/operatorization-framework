@@ -1279,9 +1279,7 @@
             document.getElementById('operator-score-count').innerText = scoreHistory.length;
         }
 
-        // --- MATH OPERATORS ACCORDING TO SPECIFICATIONS ---
-
-        // 1. ΩTuy Selection Operator
+        // 1. ΩTuy Selection Operator (Possibility-Space Reduction)
         function runTuyOperator(inputState, config) {
             const start = performance.now();
             const threshold = (config && config.integrityThreshold !== undefined) ? config.integrityThreshold : 25;
@@ -1293,12 +1291,14 @@
             const initialInvalidCount = initialStates.filter(s => !s.valid).length;
             const initialFeasibleCount = initialStates.filter(s => s.valid && s.energy >= threshold).length;
 
+            // Apply Tuy's Cuts (Filtering)
             let filteredStates = initialStates.filter(state => {
                 if (strict && !state.valid) return false;
                 if (state.energy < threshold) return false;
                 return true;
             });
 
+            // Target single branch if executing specific modes
             let selectedCandidate = null;
             if (filteredStates.length > 0) {
                 if (mode === "argmin") {
