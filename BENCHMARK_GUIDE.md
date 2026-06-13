@@ -2,7 +2,7 @@
 
 ## Operatorization Experimental Platform (OEP)
 
-This document describes the benchmark configuration system used by the Operatorization Experimental Platform (OEP) and explains how the generated possibility space is used to evaluate the behavior of ΩTuy, ΩBrauer, and ΩDEO2.
+This document describes the benchmark configuration system used by the Operatorization Experimental Platform (OEP) and explains how generated possibility spaces are used to evaluate the behavior of ΩTuy, ΩBrauer, ΩDEO2, and their compositions.
 
 ---
 
@@ -16,13 +16,13 @@ S_0 = {s_1,s_2,\ldots,s_N}
 
 which serves as the starting state for all operator evaluations.
 
-Three parameters control the structure of this space:
+Three parameters control the structure of this possibility space:
 
 * Candidate States (N)
 * Infeasible Ratio
 * Symmetry Orbit Groups (G)
 
-Together, these parameters provide a reproducible experimental environment for measuring operator behavior.
+Together, these parameters provide a controlled and reproducible environment for evaluating executable operators.
 
 ---
 
@@ -42,12 +42,11 @@ Larger values create larger search spaces and increase computational complexity.
 
 ## Typical Values
 
-| N    | Interpretation           |
-| ---- | ------------------------ |
-| 10   | Small possibility space  |
-| 30   | Medium possibility space |
-| 100  | Large possibility space  |
-| 1000 | High-load benchmark      |
+| N   | Interpretation                      |
+| --- | ----------------------------------- |
+| 30  | Small possibility space             |
+| 100 | Large possibility space             |
+| 150 | Maximum supported possibility space |
 
 ---
 
@@ -106,7 +105,7 @@ Example:
 with
 
 [
-N=100
+N = 100
 ]
 
 produces:
@@ -120,7 +119,7 @@ produces:
 
 The parameter evaluates the ability of ΩTuy to eliminate undesirable states.
 
-Higher values increase the difficulty of the selection process.
+Higher values increase the difficulty of the reduction process.
 
 ---
 
@@ -128,10 +127,9 @@ Higher values increase the difficulty of the selection process.
 
 | Infeasible Ratio | Classification |
 | ---------------- | -------------- |
-| 10%              | Low Noise      |
-| 30%              | Medium Noise   |
+| 30%              | Moderate Noise |
 | 50%              | High Noise     |
-| 70%              | Extreme Noise  |
+| 80%              | Extreme Noise  |
 
 ---
 
@@ -141,6 +139,7 @@ This parameter directly affects:
 
 * Reduction Rate
 * Behavioral Fidelity of ΩTuy
+* Overall Operator Score
 
 ---
 
@@ -148,7 +147,7 @@ This parameter directly affects:
 
 ## Definition
 
-Symmetry Orbit Groups controls the number of equivalence classes generated inside the possibility space.
+Symmetry Orbit Groups controls the number of equivalence classes generated within the possibility space.
 
 Example:
 
@@ -196,76 +195,132 @@ This process models stabilization through symmetry reduction.
 
 ## Recommended Values
 
-| G  | Interpretation    |
-| -- | ----------------- |
-| 1  | No symmetry       |
-| 3  | Low symmetry      |
-| 5  | Moderate symmetry |
-| 10 | High symmetry     |
+| G | Interpretation    |
+| - | ----------------- |
+| 3 | Low symmetry      |
+| 5 | Moderate symmetry |
 
 Larger values increase the stabilization workload assigned to ΩBrauer.
 
 ---
 
-# 5. Recommended Benchmark Profiles
+# 5. Benchmark Profiles
 
-## Benchmark A — Small
+To provide a reproducible evaluation environment, OEP defines three benchmark profiles representing increasing levels of possibility-space complexity.
 
-```json
-{
-  "N": 30,
-  "InvalidRatio": 0.3,
-  "G": 3
-}
-```
-
-Suitable for demonstrations and quick validation.
+These profiles determine the difficulty of the generated possibility space.
 
 ---
 
-## Benchmark B — Medium
+## Small Profile
 
-```json
-{
-  "N": 100,
-  "InvalidRatio": 0.3,
-  "G": 5
-}
+```text
+Candidate States (N)      = 30
+Invalid Ratio             = 30%
+Symmetry Orbit Groups (G) = 3
 ```
 
-Suitable for routine experimentation.
+Purpose:
+
+* Functional validation
+* Operator debugging
+* Demonstration experiments
 
 ---
 
-## Benchmark C — Large
+## Large Profile
 
-```json
-{
-  "N": 500,
-  "InvalidRatio": 0.4,
-  "G": 8
-}
+```text
+Candidate States (N)      = 100
+Invalid Ratio             = 50%
+Symmetry Orbit Groups (G) = 5
 ```
 
-Suitable for performance analysis.
+Purpose:
+
+* Performance evaluation
+* Scalability analysis
+* Comparative benchmarking
 
 ---
 
-## Benchmark D — Stress Test
+## Max Profile
 
-```json
-{
-  "N": 1000,
-  "InvalidRatio": 0.5,
-  "G": 10
-}
+```text
+Candidate States (N)      = 150
+Invalid Ratio             = 80%
+Symmetry Orbit Groups (G) = 5
 ```
 
-Suitable for high-load benchmarking.
+Purpose:
+
+* Stress testing
+* Robustness evaluation
+* Extreme-noise experiments
 
 ---
 
-# 6. Interpretation within the Operatorization Framework
+# 6. Benchmark Run Profiles
+
+Benchmark Runs represent the number of repeated simulations executed by the Scientific Benchmark Engine.
+
+Unlike benchmark profiles, benchmark runs do not change the possibility space itself.
+
+Instead, they increase statistical confidence in the reported results.
+
+---
+
+## Run Levels
+
+| Runs  | Purpose                               |
+| ----- | ------------------------------------- |
+| 100   | Quick validation                      |
+| 1000  | Standard research benchmark           |
+| 10000 | High-confidence statistical benchmark |
+
+---
+
+## Recommended Configuration
+
+Unless otherwise specified, benchmark datasets included in this repository use:
+
+```text
+Benchmark Runs = 1000
+```
+
+This configuration provides a practical balance between computational efficiency and statistical stability.
+
+---
+
+# 7. Benchmark Philosophy
+
+The benchmark system evaluates two independent dimensions.
+
+## Possibility-Space Complexity
+
+Controlled by:
+
+* Candidate States (N)
+* Infeasible Ratio
+* Symmetry Orbit Groups (G)
+
+This dimension determines the difficulty of the generated state space.
+
+---
+
+## Statistical Evaluation Depth
+
+Controlled by:
+
+* Benchmark Runs
+
+This dimension determines the reliability and stability of the reported measurements.
+
+Consequently, a Small, Large, or Max profile may be evaluated using 100, 1000, or 10000 benchmark iterations.
+
+---
+
+# 8. Interpretation within the Operatorization Framework
 
 The State Vector Generator creates an initial possibility space (S_0) consisting of candidate states, infeasible states, and symmetry orbit structures.
 
@@ -274,21 +329,23 @@ These parameters provide a controlled environment for evaluating:
 * The reduction capability of ΩTuy
 * The stabilization capability of ΩBrauer
 * The evolutionary behavior of ΩDEO2
+* The behavior of composed operator pipelines
 
 under reproducible experimental conditions.
 
 ---
 
-# 7. Reproducibility
+# 9. Reproducibility
 
 All benchmark configurations are deterministic and fully configurable.
 
 Researchers are encouraged to report:
 
-* N
+* Candidate States (N)
 * Infeasible Ratio
-* Symmetry Orbit Groups
+* Symmetry Orbit Groups (G)
 * Benchmark Profile
-* Number of Simulation Runs
+* Benchmark Runs
+* Operator Type (ΩTuy, ΩBrauer, ΩDEO2, or Pipeline)
 
 when publishing experimental results obtained using the Operatorization Experimental Platform.
