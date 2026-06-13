@@ -459,11 +459,17 @@
                             </span>
                         </div>
 
-                        <!-- Run button -->
-                        <button onclick="runBenchmarkMode()" id="btn-run-benchmark" class="w-full py-2 px-4 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-sm transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/10">
-                            <i data-lucide="zap" class="w-4 h-4 fill-slate-950"></i>
-                            RUN RESEARCH BENCHMARK
-                        </button>
+                        <!-- Benchmark Action Buttons Grid (Run & Reset) -->
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="runBenchmarkMode()" id="btn-run-benchmark" class="col-span-2 py-2 px-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/10">
+                                <i data-lucide="zap" class="w-4 h-4 fill-slate-950"></i>
+                                RUN BENCHMARK
+                            </button>
+                            <button onclick="resetBenchmarkMode()" id="btn-reset-benchmark" class="col-span-1 py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-bold transition flex items-center justify-center gap-1" title="Clear benchmark data & telemetry">
+                                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                                Reset
+                            </button>
+                        </div>
 
                         <!-- Progress Bar (Hidden by default) -->
                         <div id="benchmark-progress-container" class="hidden space-y-1">
@@ -931,6 +937,38 @@
             } else if (id === 'sim-count') {
                 label.innerText = `${slider.value} runs`;
             }
+        }
+
+        // Helper: Reset research benchmark parameters and historical results
+        function resetBenchmarkMode() {
+            lastBenchmarkData = [];
+            
+            // Hide metrics statistics table & banner warning
+            document.getElementById('benchmark-stats-panel').classList.add('hidden');
+            document.getElementById('benchmark-stale-warning').classList.add('hidden');
+            
+            // Hide and flush computation progress tracking bars
+            document.getElementById('benchmark-progress-container').classList.add('hidden');
+            const progressBar = document.getElementById('benchmark-progress-bar');
+            if (progressBar) progressBar.style.width = '0%';
+            const percentageText = document.getElementById('benchmark-percentage');
+            if (percentageText) percentageText.innerText = '0%';
+            
+            // Re-activate research button triggers safely
+            const runBtn = document.getElementById('btn-run-benchmark');
+            if (runBtn) {
+                runBtn.disabled = false;
+                runBtn.classList.remove('opacity-50');
+            }
+
+            // Wipe performance visualization line charts
+            if (benchmarkChartInstance) {
+                benchmarkChartInstance.data.labels = [];
+                benchmarkChartInstance.data.datasets[0].data = [];
+                benchmarkChartInstance.update();
+            }
+
+            addTraceLog("Research Benchmark telemetry workspace and cache cleared.", "info");
         }
 
         // Helper: Open/close modal schema details
@@ -1528,7 +1566,7 @@
                 document.getElementById('metric-exec-time').innerText = `${output.metrics.executionTime.toFixed(3)} ms`;
                 document.getElementById('metric-compression').innerText = `${output.metrics.compressionRatio}x`;
                 
-                addTraceLog(`Executed ΩBrauer (H=${config.height.H}). Dynamic threshold τ(H)=${output.metrics.tauUsed.toFixed(3)}. Merged orbits.`, "brauer");
+                addTraceLog("Executed ΩBrauer. Merged orbits.", "brauer");
                 
                 calculateAndRenderFidelity('brauer', {
                     energyPreservationRate: output.metrics.energyPreservationRate,
@@ -1541,7 +1579,7 @@
                 document.getElementById('metric-exec-time').innerText = `${output.metrics.executionTime.toFixed(3)} ms`;
                 document.getElementById('metric-evolution').innerText = output.metrics.evolutionDepth;
                 
-                addTraceLog(`Executed ΩDEO2. Steps=${config.partitioning.n_steps}, dt=${config.evolution_delta_t}. Evolved state vectors (y, v).`, "deo2");
+                addTraceLog("Executed ΩDEO2. Evolved state vectors (y, v).", "deo2");
                 
                 calculateAndRenderFidelity('deo2', {
                     transitionValidityRate: output.metrics.transitionValidityRate,
@@ -1683,97 +1721,103 @@
 
             const symmetryNames = ['G_alpha', 'G_beta', 'G_gamma', 'G_delta', 'G_epsilon'];
 
-            // CRITICAL FIX: Fetch actual parameter states configured on sliders to run faithful evaluation
+            // Fetch actual parameter states configured on sliders to run faithful evaluation
             const currentN = parseInt(document.getElementById('input-state-count').value); 
             const currentInvalidRatio = parseInt(document.getElementById('input-invalid-ratio').value) / 100;
             const currentG = parseInt(document.getElementById('input-symmetry-groups').value);
 
-            while (completed < simCount) {
-                const currentChunk = Math.min(chunkSize, simCount - completed);
-                
-                for (let i = 0; i < currentChunk; i++) {
-                    const virtualStates = [];
+            try {
+                while (completed < simCount) {
+                    const currentChunk = Math.min(chunkSize, simCount - completed);
+                    
+                    for (let i = 0; i < currentChunk; i++) {
+                        const virtualStates = [];
 
-                    for (let n = 0; n < currentN; n++) {
-                        const y = parseFloat((Math.random() * 20 - 10).toFixed(4));
-                        const v = parseFloat((Math.random() * 4 - 2).toFixed(4));
-                        const energy = parseFloat((y * y + 0.5 * v * v).toFixed(4));
+                        for (let n = 0; n < currentN; n++) {
+                            const y = parseFloat((Math.random() * 20 - 10).toFixed(4));
+                            const v = parseFloat((Math.random() * 4 - 2).toFixed(4));
+                            const energy = parseFloat((y * y + 0.5 * v * v).toFixed(4));
 
-                        virtualStates.push({
-                            id: `V${n+1}`,
-                            y: y,
-                            v: v,
-                            energy: energy,
-                            valid: Math.random() >= currentInvalidRatio,
-                            symmetryGroup: symmetryNames[n % currentG],
-                            transitions: [],
-                            weight: Math.random()
+                            virtualStates.push({
+                                id: `V${n+1}`,
+                                y: y,
+                                v: v,
+                                energy: energy,
+                                valid: Math.random() >= currentInvalidRatio,
+                                symmetryGroup: symmetryNames[n % currentG],
+                                transitions: [],
+                                weight: Math.random()
+                            });
+                        }
+
+                        // Add transition paths dynamically scaled with system node density parameters
+                        const edgeThreshold = Math.min(0.9, 0.5 + (1 / currentN));
+                        for (let n = 0; n < currentN; n++) {
+                            for (let t = 0; t < currentN; t++) {
+                                if (t !== n && Math.random() > edgeThreshold) {
+                                    virtualStates[n].transitions.push({ to: `V${t+1}`, weight: 0.5 });
+                                }
+                            }
+                        }
+
+                        const virtualSystem = { states: virtualStates };
+
+                        const tStart = performance.now();
+                        const pipeStep1 = runTuyOperator(virtualSystem, operatorsConfig.tuy.config);
+                        const pipeStep2 = runBrauerOperator(pipeStep1.resultState, operatorsConfig.brauer.config);
+                        const pipeStep3 = runDEO2Operator(pipeStep2.resultState, operatorsConfig.deo2.config);
+                        const tEnd = performance.now();
+
+                        const runTime = tEnd - tStart;
+                        
+                        const fidelity = (
+                            ((pipeStep1.metrics.removedInvalidCount / (pipeStep1.metrics.initialInvalidCount || 1)) * 50 + (pipeStep1.metrics.preservedFeasibleCount / (pipeStep1.metrics.initialFeasibleCount || 1)) * 50) +
+                            (pipeStep2.metrics.energyPreservationRate * 0.6 + Math.min(100, pipeStep2.metrics.compressionRatio * 50) * 0.4) +
+                            (pipeStep3.metrics.transitionValidityRate * 50 + pipeStep3.metrics.evolutionConsistency * 50)
+                        ) / 3;
+
+                        const execRating = Math.max(0, Math.min(100, 100 - (runTime * 15)));
+                        const density = 0.15; 
+                        const reusability = 70 + (density * 100);
+                        const stability = 95 - (Math.random() * 8);
+                        const finalScore = (fidelity * 0.40) + (execRating * 0.30) + (reusability * 0.20) + (stability * 0.10);
+
+                        results.push({
+                            runIndex: completed + i + 1,
+                            initialStates: currentN,
+                            finalStates: pipeStep3.resultState.states.length,
+                            executionTimeMs: runTime,
+                            compressionRatio: pipeStep2.metrics.compressionRatio,
+                            reductionRate: pipeStep1.metrics.reductionRate,
+                            fidelityScore: fidelity,
+                            operatorScore: finalScore
                         });
                     }
 
-                    // Add transition paths dynamically scaled with system node density parameters
-                    const edgeThreshold = Math.min(0.9, 0.5 + (1 / currentN));
-                    for (let n = 0; n < currentN; n++) {
-                        for (let t = 0; t < currentN; t++) {
-                            if (t !== n && Math.random() > edgeThreshold) {
-                                virtualStates[n].transitions.push({ to: `V${t+1}`, weight: 0.5 });
-                            }
-                        }
-                    }
+                    completed += currentChunk;
+                    const percent = Math.round((completed / simCount) * 100);
+                    progressBar.style.width = `${percent}%`;
+                    percentageText.innerText = `${percent}%`;
+                    statusText.innerText = `Computed ${completed}/${simCount} iterations...`;
 
-                    const virtualSystem = { states: virtualStates };
-
-                    const tStart = performance.now();
-                    const pipeStep1 = runTuyOperator(virtualSystem, operatorsConfig.tuy.config);
-                    const pipeStep2 = runBrauerOperator(pipeStep1.resultState, operatorsConfig.brauer.config);
-                    const pipeStep3 = runDEO2Operator(pipeStep2.resultState, operatorsConfig.deo2.config);
-                    const tEnd = performance.now();
-
-                    const runTime = tEnd - tStart;
-                    
-                    const fidelity = (
-                        ((pipeStep1.metrics.removedInvalidCount / (pipeStep1.metrics.initialInvalidCount || 1)) * 50 + (pipeStep1.metrics.preservedFeasibleCount / (pipeStep1.metrics.initialFeasibleCount || 1)) * 50) +
-                        (pipeStep2.metrics.energyPreservationRate * 0.6 + Math.min(100, pipeStep2.metrics.compressionRatio * 50) * 0.4) +
-                        (pipeStep3.metrics.transitionValidityRate * 50 + pipeStep3.metrics.evolutionConsistency * 50)
-                    ) / 3;
-
-                    const execRating = Math.max(0, Math.min(100, 100 - (runTime * 15)));
-                    const density = 0.15; 
-                    const reusability = 70 + (density * 100);
-                    const stability = 95 - (Math.random() * 8);
-                    const finalScore = (fidelity * 0.40) + (execRating * 0.30) + (reusability * 0.20) + (stability * 0.10);
-
-                    results.push({
-                        runIndex: completed + i + 1,
-                        initialStates: currentN,
-                        finalStates: pipeStep3.resultState.states.length,
-                        executionTimeMs: runTime,
-                        compressionRatio: pipeStep2.metrics.compressionRatio,
-                        reductionRate: pipeStep1.metrics.reductionRate,
-                        fidelityScore: fidelity,
-                        operatorScore: finalScore
-                    });
+                    await new Promise(resolve => setTimeout(resolve, 1));
                 }
 
-                completed += currentChunk;
-                const percent = Math.round((completed / simCount) * 100);
-                progressBar.style.width = `${percent}%`;
-                percentageText.innerText = `${percent}%`;
-                statusText.innerText = `Computed ${completed}/${simCount} iterations...`;
+                lastBenchmarkData = results;
+                computeStatistics(results);
+                statusText.innerText = "Simulation runs finished.";
+                document.getElementById('benchmark-stats-panel').classList.remove('hidden');
+                updateBenchmarkChart(results);
 
-                await new Promise(resolve => setTimeout(resolve, 1));
+            } catch (error) {
+                console.error("Benchmark iteration error:", error);
+                statusText.innerText = "Error encountered during simulation.";
+                addTraceLog(`Benchmark failed: ${error.message}`, "info");
+            } finally {
+                // Ensure the run benchmark button is robustly unlocked immediately after completion or failure
+                runBtn.disabled = false;
+                runBtn.classList.remove('opacity-50');
             }
-
-            lastBenchmarkData = results;
-            computeStatistics(results);
-
-            // CRITICAL FIX: Ensure the run benchmark button is robustly unlocked immediately after complete
-            runBtn.disabled = false;
-            runBtn.classList.remove('opacity-50');
-            statusText.innerText = "Simulation runs finished.";
-            
-            document.getElementById('benchmark-stats-panel').classList.remove('hidden');
-            updateBenchmarkChart(results);
         }
 
         function computeStatistics(data) {
