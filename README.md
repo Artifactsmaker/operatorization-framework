@@ -10,7 +10,8 @@
 
 Run the Operatorization Experimental Platform directly in your browser:
 
-https://artifactsmaker.github.io/operatorization-framework/playground/
+https://artifactsmaker.github.io/operatorization-framework/oep/
+https://artifactsmaker.github.io/operatorization-framework/ogrb
 
 No installation required.
 No backend required.
