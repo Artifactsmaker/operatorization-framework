@@ -1,124 +1,248 @@
-Operator-Guided Reasoning Benchmark (OGRB)
+# Operator-Guided Reasoning Benchmark (OGRB)
 
-Welcome to the official repository for the Operator-Guided Reasoning Benchmark (OGRB), a reproducible academic validation platform designed to enforce, simulate, and verify formal algebraic boundary structures in Large Language Model (LLM) reasoning trajectories.
+A Reproducible Validation Platform for Operator-Guided Reasoning Systems
 
-OGRB introduces Operator Intelligence (O.i), embedding executable algebraic transformations directly into the model's environment to guarantee logical consistency and reduce unconstrained search space violations to zero.
+---
 
-1. Project Metadata & Attribution
+## Overview
 
-Principal Investigator: Phan Thanh Trung (Independent Researcher, Vietnam)
+Operator-Guided Reasoning Benchmark (OGRB) is an experimental benchmarking platform designed to evaluate reasoning behavior under explicit operator constraints.
 
-ORCID Identifiers: 0009-0000-7520-6781
+The project investigates whether executable operators can improve reasoning consistency, reduce trajectory drift, and enhance decision quality in complex problem-solving environments.
 
-Preprint DOI: 10.5281/zenodo.20669008
+OGRB is part of the broader Operatorization Framework research initiative and serves as a practical validation environment for operator-guided reasoning systems.
 
-Code Repository: Artifactsmaker/operatorization-framework
+---
 
-Academic Submission Track: IEEE Transactions on Operator Intelligence (IEEE-TOI-2026-X8712)
+## Research Background
 
-2. Core Mathematical Operators
+Traditional AI reasoning systems often rely on unconstrained search processes, statistical patterns, or prompt engineering techniques.
 
-The OGRB framework validates three distinct structural operational paradigms to prevent logical drift under strict multi-variable constraints:
+OGRB explores an alternative approach:
 
-2.1 Tuy Selection Operator ($\Omega_{\mathrm{Tuy}}$)
+**Operator-Guided Reasoning**
 
-Designed for space pruning in non-convex or polyhedral constraint networks. It iteratively constructs algebraic cutting planes to shrink candidate search spaces ($\Psi$):
+Instead of relying solely on model-generated reasoning trajectories, the system introduces executable operators that actively guide, constrain, and stabilize reasoning behavior during execution.
 
-$$\Omega_{\mathrm{Tuy}}(\Psi) \rightarrow \operatorname{argmin}_{x \in \Psi} \mathcal{E}(x)$$
+The benchmark evaluates whether operator-guided reasoning produces more consistent and reliable outcomes than unconstrained reasoning approaches.
 
-This operator systematically filters out mathematically infeasible sub-regions before LLM decoding converges on a boundary crash.
+---
 
-2.2 Brauer Height-Collapse Operator ($\Omega_{\mathrm{Brauer}}$ / $\mathcal{H}_{0}^{\perp}$)
+## Core Operator Families
 
-Enforces grammatical and contextual semantic stability under contextual perturbations. Under severe representation metric decay where metric height $H \to 0$, representations collapse onto an invariant symmetric orbit $\operatorname{Orb}(x)$:
+### ΩTuy — Selection Operator
 
-$$\mathcal{H}_{0}^{\perp} = \lim_{H \to 0} g_H \quad \text{s.t.} \quad \det(g_H) \to 0$$
+Derived from concepts inspired by Tuy's Cut methodology.
 
-Any paraphrasing of a prompt within the orbit group triggers the same canonical, stable response pattern.
+Purpose:
 
-2.3 DEO2 Operator ($\Omega_{\mathrm{DEO2}}$)
+* Search-space reduction
+* Constraint enforcement
+* Candidate filtering
+* Boundary preservation
 
-Tracks dynamic second-order physical processes over bounded domains via product-limits of projection manifolds ($\Pi$) and step transition matrices ($\Lambda$):
+The operator attempts to eliminate infeasible solution regions before reasoning converges.
 
-$$\mathcal{D}_{\mathrm{DEO\text{-}2}}(T)=\lim_{n\to\infty}\prod_{k=1}^{n}\Big(\Pi_{t_k}\,\exp(\Delta t_k\,\Lambda(t_k))\,\Pi_{t_k}\Big)$$
+---
 
-This structures iterative execution, ensuring constraint criteria hold strictly across long-horizon step-by-step simulations.
+### ΩBrauer — Stabilization Operator
 
-3. Key Platform Features
+Derived from concepts inspired by Brauer Height-Zero structures.
 
-The repository contains a fully self-contained, publication-grade academic dashboard (operator_guided_reasoning_benchmark.html) featuring:
+Purpose:
 
-Benchmark Corpus Manager: Dataset versioning selector supporting v1.4.0 (Stable Grounding), v1.5.1 (Extreme Bounds), and v1.6.0 (Degenerate Coordinates) alongside custom JSON task importing/exporting.
+* Semantic stabilization
+* Context preservation
+* Representation consistency
+* Response invariance
 
-Deterministic Reproducibility Engine: Unified Mulberry32 Pseudo-Random Number Generator (PRNG) configuration locking down stochastic variance. Supports instant state snapshot capturing and replay configs.
+The operator attempts to reduce reasoning instability caused by prompt variation and contextual perturbation.
 
-Statistical Validation Engine: Computes Mean, Standard Deviation, and 95% Confidence Intervals. Performs parametric Student t-tests, non-parametric Mann-Whitney U tests, Cohen's d effect sizes, and p-value levels.
+---
 
-Ablation Study Matrix: Evaluates 7 distinct configurations (Baseline vs. Single Operators vs. Combined Permutations) to map cooperative synergy.
+### ΩDEO2 — Evolution Operator
 
-Bilingual Localization: Switch between Vietnamese and English layouts dynamically with a unified global toggle button.
+Derived from second-order evolutionary processes.
 
-Preprint Mode: Instantly formats the entire interface into a distraction-free, light-mode paper conforming to IEEE Transactions preprint formatting guidelines for physical PDF generation.
+Purpose:
 
-4. Getting Started
+* Sequential reasoning control
+* Multi-step trajectory management
+* Long-horizon consistency
+* State-transition monitoring
 
-4.1 Running the Desktop Validation App
+The operator attempts to maintain coherent reasoning across extended execution chains.
 
-No installation of complex Python compilers or local virtual environments is necessary. The application is completely portable.
+---
 
-Download the operator_guided_reasoning_benchmark.html file from this repository.
+## Platform Features
 
-Double-click the file to open it in any modern web browser (Chrome, Firefox, Safari, Edge).
+### Benchmark Corpus Manager
 
-The platform will automatically render KaTeX math environments, compile standard Chart.js analytics graphs, and activate the evaluation runtime.
+Supports multiple benchmark configurations and custom task datasets.
 
-4.2 Step-by-Step Benchmarking Run
+Features include:
 
-Go to the Reproducibility Engine panel, set your target pseudo-random seed (e.g., 1337), and click Apply to lock down the PRNG state.
+* Dataset version management
+* JSON import/export
+* Custom task libraries
+* Experimental scenario generation
 
-Select your Problem Domain and set Tasks Per Run (e.g., 120) and Repeated Runs (e.g., 8).
+---
 
-Select an Active Evaluation Model Configuration (e.g., Full Unified Core or Baseline LLM).
+### Reproducibility Engine
 
-Click Run Active Config inside the main header and watch the live execution traces process dynamically in the Playground.
+Provides deterministic execution control.
 
-Once the sweep concludes, click Compute Synergy Values inside the Ablation Matrix to map cooperative gains.
+Features include:
 
-5. Custom Task Schema (JSON)
+* Fixed random seeds
+* State replay
+* Snapshot generation
+* Experimental reproducibility
 
-Researchers can extend the OGRB library by importing their own domain tasks. Paste a valid JSON array into the Import Tasks modal conforming to this structure:
+---
 
-[
-  {
-    "id": "task.custom_boundary_sieve",
-    "title": "Custom Space Optimization",
-    "difficulty": "Expert",
-    "prompt": "Minimize f(x) under linear constraints.",
-    "constraints": "{\n  \"bounds\": [-10, 10]\n}",
-    "expectation": "Target localized securely.",
-    "trace": [
-      "Initializing bounds...",
-      "[Baseline] Trajectory drifted outside bounds.",
-      "[ΩTuy] Applied space cuts successfully.",
-      "Final state verified."
-    ],
-    "baselineSuccess": false,
-    "opSuccess": true,
-    "opMode": "tuy"
-  }
-]
+### Statistical Validation Module
 
+Built-in statistical analysis tools include:
 
-6. Citation & Academic Reference
+* Mean
+* Standard Deviation
+* Confidence Intervals
+* Student t-tests
+* Mann–Whitney U tests
+* Effect Size Analysis
 
-If you use this benchmark platform, its data structures, or the underlying mathematical operatorology models in your research, please cite the framework using the following metadata:
+---
 
-APA 7th Edition
+### Ablation Study Matrix
 
-Phan, T. T. (2026). Operator-Guided Reasoning Benchmark (OGRB): Empirical Validation of Executable Invariant Structures in LLM Systems. Zenodo. https://doi.org/10.5281/zenodo.20669008
+Supports comparative evaluation of:
 
-BibTeX
+* Baseline reasoning
+* Single-operator systems
+* Multi-operator systems
+* Full operator stacks
 
-@software{phan_2026_ogrb,
-  author       = {Phan Thanh Trung},
-  title        = {{Operator-Guided Reasoning Benchmark (OGRB): Empirical 
+This enables analysis of individual and cooperative operator effects.
+
+---
+
+### Bilingual Interface
+
+The platform supports:
+
+* English
+* Vietnamese
+
+Language switching is available directly within the interface.
+
+---
+
+### Academic Preview Mode
+
+A publication-oriented interface designed for:
+
+* Preprint generation
+* Research reporting
+* PDF export
+* Academic presentation
+
+---
+
+## Running OGRB
+
+No installation is required.
+
+1. Download the OGRB HTML application.
+2. Open the file in a modern web browser.
+3. Configure benchmark parameters.
+4. Select evaluation mode.
+5. Execute benchmark runs.
+6. Review generated statistics and reports.
+
+The platform runs entirely in-browser and requires no backend infrastructure.
+
+---
+
+## Custom Task Format
+
+Researchers may extend OGRB by importing custom benchmark tasks using JSON-based task definitions.
+
+Typical task definitions include:
+
+* Task identifier
+* Difficulty level
+* Prompt specification
+* Constraints
+* Expected behavior
+* Execution traces
+* Benchmark outcomes
+
+This enables domain-specific benchmarking across a wide range of reasoning scenarios.
+
+---
+
+## Applications
+
+Potential applications include:
+
+* Reasoning evaluation
+* AI benchmarking
+* Operator validation
+* Research reproducibility
+* Decision-support systems
+* Executable knowledge systems
+
+---
+
+## Citation
+
+If you use OGRB in academic work, please cite:
+
+Phan Thanh Trung.
+
+Operator-Guided Reasoning Benchmark (OGRB).
+
+Zenodo, 2026.
+
+DOI:
+
+https://doi.org/10.5281/zenodo.20669008
+
+---
+
+## License
+
+Copyright © 2026 Phan Thanh Trung
+
+Licensed under the Apache License, Version 2.0.
+
+You may obtain a copy of the License at:
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, the software is distributed on an "AS IS" basis, without warranties or conditions of any kind.
+
+See the LICENSE file for details.
+
+SPDX-License-Identifier: Apache-2.0
+
+---
+
+## Author
+
+Phan Thanh Trung
+
+Independent Researcher
+
+ORCID: 0009-0000-7520-6781
+
+Repository:
+
+https://github.com/Artifactsmaker/operatorization-framework
+
+DOI:
+
+https://doi.org/10.5281/zenodo.20669008
