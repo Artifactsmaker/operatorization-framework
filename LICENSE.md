@@ -1,29 +1,37 @@
-Creative Commons Attribution 4.0 International (CC BY 4.0)
+Apache License 2.0
 
-SPDX-License-Identifier: CC-BY-4.0
+SPDX-License-Identifier: Apache-2.0
 
 Copyright (c) 2026 Phan Thanh Trung
 
-This work, including but not limited to the Operatorization Framework, operator specifications, operator schemas, documentation, figures, benchmark datasets, and associated research materials, is licensed under the Creative Commons Attribution 4.0 International License.
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this repository except in compliance with the License.
 
-You are free to:
+You may obtain a copy of the License at:
 
-• Share — copy and redistribute the material in any medium or format.
+http://www.apache.org/licenses/LICENSE-2.0
 
-• Adapt — remix, transform, and build upon the material for any purpose, including commercial use.
+Unless required by applicable law or agreed to in writing, software, source code, operator implementations, benchmarks, datasets, documentation, and associated materials distributed under the License are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
-Under the following terms:
+See the License for the specific language governing permissions and limitations under the License.
 
-• Attribution — You must give appropriate credit, provide a link to the license, and indicate if changes were made. Attribution must not suggest that the licensor endorses you or your use.
+This repository contains the Operatorization Framework, including but not limited to:
 
-No additional restrictions may be applied beyond those specified in the license.
-
-License URL:
-
-https://creativecommons.org/licenses/by/4.0/
+• Operator specifications
+• Operator schemas
+• Operator implementations
+• Benchmark datasets
+• Experimental platforms (OEP, OGRB)
+• Documentation and supporting materials
 
 Recommended citation:
 
-Phan Thanh Trung. Operatorization Framework v1.0. Zenodo, 2026.
+Phan Thanh Trung.
+Operatorization Framework v1.0.
+Zenodo, 2026.
 
 https://doi.org/10.5281/zenodo.20669008
+
+License URL:
+
+http://www.apache.org/licenses/LICENSE-2.0
