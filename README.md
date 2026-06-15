@@ -1,45 +1,50 @@
 # Operatorization Framework
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20669008.svg)](https://doi.org/10.5281/zenodo.20669008)
+
 **Transforming Fixed Solutions into Executable Knowledge**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20669008.svg)](https://doi.org/10.5281/zenodo.20669008)
+Author: **Phan Thanh Trung**
+Affiliation: Independent Researcher
+Version: 1.0
 
 ---
 
-## Live Demo
+## Overview
 
-Run the Operatorization Experimental Platform directly in your browser:
+The **Operatorization Framework** is a conceptual and computational framework for transforming fixed knowledge structures into reusable executable operators.
 
-* https://artifactsmaker.github.io/operatorization-framework/oep/
-* https://artifactsmaker.github.io/operatorization-framework/ogrb
+Rather than treating theorems, laws, algorithms, proofs, and expert knowledge as static artifacts, Operatorization investigates how their latent operational behavior can be extracted, formalized, and represented as executable computational entities.
+
+The framework aims to establish a bridge between human knowledge and executable reasoning systems, providing foundations for operator libraries, knowledge execution engines, and future scientific AI architectures.
+
+---
+
+## Live Demonstrations
+
+The Operatorization Experimental Platform can be accessed directly in a web browser.
+
+### Operator Execution Protocol (OEP)
+
+https://artifactsmaker.github.io/operatorization-framework/oep/
+
+### Operator-Guided Reasoning Benchmark (OGRB)
+
+https://artifactsmaker.github.io/operatorization-framework/ogrb
 
 No installation required.
 No backend required.
 Runs entirely in-browser.
 
-## Overview
-
-Operatorization is a research framework that investigates how stable scientific knowledge structures can be transformed into reusable executable operators.
-
-Rather than treating theorems, laws, algorithms, and proofs solely as static knowledge artifacts, the framework explores methods for extracting their operational behavior, constraints, and reusable computational structures.
-
-The long-term objective is to establish a bridge between human knowledge and executable computational systems, enabling the construction of operator libraries, reasoning systems, and future scientific AI architectures.
-
 ---
 
-## Research Motivation
+## Core Idea
 
-Modern knowledge is typically represented as static artifacts:
+Traditional knowledge systems primarily store information.
 
-* Theorems
-* Laws
-* Algorithms
-* Proofs
-* Expert Knowledge
+Operatorization focuses on executable behavior.
 
-While these artifacts encode valuable operational behavior, that behavior often remains implicit.
-
-Operatorization investigates whether such latent behavior can be systematically extracted, formalized, and represented as executable operators that may be reused across computational environments.
+The framework investigates whether stable knowledge structures can be transformed into reusable operators capable of supporting computational reasoning and knowledge execution.
 
 ---
 
@@ -73,43 +78,43 @@ Scientific AI
 
 ### Knowledge Objects
 
-Scientific and mathematical artifacts that encode stable knowledge structures.
+Scientific and mathematical artifacts containing stable knowledge structures.
 
 Examples include:
 
 * Theorems
-* Laws
+* Scientific Laws
 * Algorithms
 * Formal Proofs
 * Expert Knowledge
 
 ### Operatorization
 
-A methodological process for transforming static knowledge into executable behavioral representations.
+The process of transforming static knowledge into executable behavioral representations.
 
 ### Executable Operators
 
-Formalized computational entities that capture reusable behavior extracted from knowledge objects.
+Reusable computational entities derived from knowledge objects.
 
 ### Operator Libraries
 
-Collections of executable operators that can be organized, validated, composed, and reused.
+Structured collections of executable operators that can be validated, composed, and reused.
 
 ### Computational Reasoning
 
-Reasoning systems capable of utilizing executable operators rather than relying solely on symbolic descriptions or statistical patterns.
+Reasoning systems that utilize executable operators rather than relying solely on symbolic descriptions or statistical correlations.
 
 ---
 
 ## Reference Operators
 
-This repository contains the initial reference implementations of three representative operator classes:
+The framework currently includes three representative operator classes.
 
 ### ΩTuy — Selection Operator
 
-Derived from Tuy's Cut methodology in global optimization.
+Derived from Tuy's Cut methodology.
 
-Behavioral category:
+Behavioral Category:
 
 ```text
 Selection
@@ -117,9 +122,9 @@ Selection
 
 ### ΩBrauer — Stabilization Operator
 
-Derived from Brauer's Height-Zero principles in representation theory.
+Derived from Brauer's Height-Zero principles.
 
-Behavioral category:
+Behavioral Category:
 
 ```text
 Stabilization
@@ -129,57 +134,78 @@ Stabilization
 
 Derived from second-order evolution equations and Chernoff approximation theory.
 
-Behavioral category:
+Behavioral Category:
 
 ```text
 Evolution
 ```
 
-Together, these operators illustrate three fundamental behavioral classes explored within the Operatorization Framework.
+Together these operators illustrate three foundational behavioral classes explored within the Operatorization Framework.
 
 ---
 
-## Repository Contents
+## Repository Structure
 
 ```text
-figures/
-graphical_abstract/
-paper/
-operators/
-playground/
-benchmark/
+operatorization-framework/
+│
+├── figures/
+├── graphical_abstract/
+├── paper/
+├── operators/
+├── playground/
+├── benchmark/
+├── oep/
+└── ogrb/
 ```
+
+---
+
+## Research Contributions
+
+The framework introduces:
+
+* Operatorization
+* Executable Knowledge
+* Knowledge-to-Operator Transformation
+* Operator Libraries
+* Operator Execution Protocol (OEP)
+* Operator-Guided Reasoning Benchmark (OGRB)
+
+These components provide an initial foundation for transforming static knowledge into executable computational systems.
 
 ---
 
 ## Citation
 
-If you use or reference this repository, please cite:
+If you use this framework in research, software, or educational materials, please cite:
 
 ```text
 Phan Thanh Trung.
-Operatorization Framework v1.0.
-Zenodo.
-https://doi.org/10.5281/zenodo.20669008
-```
 
-DOI:
+Operatorization:
+A Framework for Transforming Fixed Solutions
+into Executable Knowledge.
 
-```text
-10.5281/zenodo.20669008
+Zenodo, 2026.
+
+DOI: 10.5281/zenodo.20669008
 ```
 
 ---
 
-## Author
+## DOI
 
-**Phan Thanh Trung**
+https://doi.org/10.5281/zenodo.20669008
 
-Independent Researcher
+---
 
-ORCID: https://orcid.org/0009-0000-7520-6781
+## Related Projects
 
-Email: [pttrung@operatorology.com](mailto:pttrung@operatorology.com)
+* Operatorization Framework
+* Operator Execution Protocol (OEP)
+* Operator-Guided Reasoning Benchmark (OGRB)
+* Manuscript Trajectory Framework (MTF)
 
 ---
 
@@ -191,18 +217,30 @@ Current Version:
 v1.0
 ```
 
-This repository serves as the public reference implementation and research workspace for the ongoing development of the Operatorization Framework.
+This repository serves as the primary reference implementation and research workspace for the ongoing development of the Operatorization Framework.
 
 Future work includes:
 
-* Expanded operator libraries
-* Automated operator extraction
-* Validation methodologies
-* Reasoning system integration
-* Scientific AI applications
+* Expanded Operator Libraries
+* Automated Operator Extraction
+* Operator Validation Methodologies
+* Reasoning System Integration
+* Scientific AI Applications
+
 ---
+
 ## License
 
-This project is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+### Paper
 
-https://creativecommons.org/licenses/by/4.0/
+Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+### Software and Source Code
+
+Apache License 2.0
+
+---
+
+**Author:** Phan Thanh Trung
+**DOI:** 10.5281/zenodo.20669008
+**Year:** 2026
