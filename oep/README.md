@@ -141,6 +141,8 @@ Academic Report: Click Get Report to render a formal validation document. You ca
 
 Paper Mode Vector Figures: Click Paper Mode in the top navigation bar. High-contrast vector graphics (SVG format) representing your active simulation's Pipeline Schema, Fidelity Distribution Curve, and Computational Latency Density will render. Click Download SVG Vector File to save these files for high-resolution LaTeX typesetting.
 
-5. Licensing & Reproducibility Statement
+5. License
 
-This framework is licensed under CC-BY-4.0. All algorithms are completely deterministic, and execution logs are traceable, satisfying strict academic peer-review validation and reproducibility requirements.
+OEP is part of the Operatorization Framework project and is distributed under the Apache License 2.0.
+
+See the repository LICENSE file for details.
